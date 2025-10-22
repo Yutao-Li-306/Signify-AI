@@ -6,7 +6,7 @@
 
 ## Mission Statement
 
-**Signify Analytics Technology LLC** — A social media stock market signifier and predictor app that aggregates analysis from Reddit, Discord, and other social forums to identify top-performing independent analysts and generate winning investment strategies.
+**Signify AI** — A social media stock market signifier and predictor app that aggregates analysis from Reddit, Discord, and other social forums to identify top-performing independent analysts and generate winning investment strategies.
 
 ---
 
