@@ -1,0 +1,25 @@
+version: '3.8'
+
+networks:
+  coolify:
+    external: true
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    networks:
+      - coolify
+    environment:
+      - PORT=3000
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    networks:
+      - coolify
+    environment:
+      - PORT=3001
+      - HOSTNAME=0.0.0.0

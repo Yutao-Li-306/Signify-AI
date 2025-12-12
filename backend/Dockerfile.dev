@@ -1,0 +1,15 @@
+FROM node:20-alpine
+
+WORKDIR /app
+COPY package.json package-lock.json* ./
+# Use npm install for dev to handle out-of-sync lock files
+RUN npm install
+
+COPY . .
+
+EXPOSE 3001
+ENV NODE_ENV=development
+ENV PORT=3001
+
+CMD ["npm", "run", "dev"]
+
