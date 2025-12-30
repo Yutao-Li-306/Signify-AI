@@ -4,7 +4,8 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
+# Use npm install if lock file is out of sync, otherwise use npm ci for faster installs
+RUN npm ci 2>/dev/null || npm install
 
 FROM base AS builder
 WORKDIR /app
