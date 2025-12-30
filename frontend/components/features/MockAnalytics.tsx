@@ -37,12 +37,14 @@ export function MockAnalytics() {
     }));
   }, [timeRange, mounted]);
 
-  // Generate category percentages only on client
+  // Generate category percentages only on client - ensure they sum to ~100%
   useEffect(() => {
     if (mounted) {
-      setCategoryPercentages(
-        Array.from({ length: 5 }, () => Math.random() * 30 + 10)
-      );
+      const percentages = Array.from({ length: 5 }, () => Math.random() * 20 + 10);
+      const sum = percentages.reduce((a, b) => a + b, 0);
+      // Normalize to sum to 100%
+      const normalized = percentages.map(p => (p / sum) * 100);
+      setCategoryPercentages(normalized);
     }
   }, [mounted]);
 
@@ -103,28 +105,30 @@ export function MockAnalytics() {
         </div>
 
         {/* Main Chart */}
-        <div className="bg-gray-50 rounded-lg p-4 sm:p-6 border border-gray-200 mb-4 sm:mb-6 overflow-x-auto">
+        <div className="bg-gray-50 rounded-lg p-4 sm:p-6 border border-gray-200 mb-4 sm:mb-6">
           <h4 className="font-semibold text-gray-900 mb-3 sm:mb-4 capitalize text-sm sm:text-base">
             {selectedMetric} Over Time
           </h4>
-          <div className="relative w-full" style={{ height: '192px', minHeight: '192px' }}>
-            <div className="h-full flex items-end justify-start gap-1.5 sm:gap-2 pb-8 overflow-x-auto">
+          <div className="relative w-full overflow-x-auto">
+            <div className="flex items-end gap-1.5 sm:gap-2" style={{ height: '200px', minWidth: 'max-content', paddingBottom: '32px' }}>
               {mounted && data.length > 0 ? (
                 data.map((point, i) => {
-                  const barHeight = maxValue > 0 ? Math.max((point.value / maxValue) * 100, 15) : 15;
-                  const barWidth = timeRange === '7d' ? '20px' : timeRange === '30d' ? '14px' : '8px';
+                  const barHeightPercent = maxValue > 0 ? (point.value / maxValue) * 100 : 0;
+                  const barHeight = Math.max(barHeightPercent, 5); // Minimum 5% height
+                  const barWidth = timeRange === '7d' ? '24px' : timeRange === '30d' ? '16px' : '10px';
+                  
                   return (
                     <div
                       key={`${point.date}-${i}`}
-                      className="group relative flex flex-col items-center justify-end flex-shrink-0"
-                      style={{ width: barWidth }}
+                      className="group relative flex flex-col items-center justify-end"
+                      style={{ width: barWidth, height: '100%' }}
                       title={`${point.date}: ${point.value.toLocaleString()}`}
                     >
                       <div
                         className="w-full bg-gradient-to-t from-purple-500 to-pink-500 rounded-t hover:from-purple-600 hover:to-pink-600 transition-all cursor-pointer shadow-sm"
                         style={{ 
                           height: `${barHeight}%`,
-                          minHeight: '20px'
+                          minHeight: '12px'
                         }}
                       />
                     </div>
@@ -135,29 +139,28 @@ export function MockAnalytics() {
                 Array.from({ length: 30 }).map((_, i) => (
                   <div 
                     key={i} 
-                    className="bg-gray-200 rounded-t flex-shrink-0" 
-                    style={{ height: '40%', width: '14px', minHeight: '20px' }} 
+                    className="bg-gray-200 rounded-t" 
+                    style={{ height: '40%', width: '16px', minHeight: '12px' }} 
                   />
                 ))
               )}
             </div>
             {/* Date labels at bottom */}
             {mounted && data.length > 0 && (
-              <div className="absolute bottom-0 left-0 flex items-center gap-1.5 sm:gap-2 overflow-x-auto">
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-2" style={{ minWidth: 'max-content' }}>
                 {data.map((point, i) => {
-                  const barWidth = timeRange === '7d' ? '20px' : timeRange === '30d' ? '14px' : '8px';
-                  if (i % Math.ceil(data.length / 7) === 0 || i === data.length - 1) {
-                    return (
-                      <div
-                        key={`label-${i}`}
-                        className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0"
-                        style={{ width: barWidth, textAlign: 'center' }}
-                      >
-                        {point.date.split(' ')[1]}
-                      </div>
-                    );
-                  }
-                  return <div key={`spacer-${i}`} className="flex-shrink-0" style={{ width: barWidth }} />;
+                  const barWidth = timeRange === '7d' ? '24px' : timeRange === '30d' ? '16px' : '10px';
+                  const showLabel = i % Math.ceil(data.length / 7) === 0 || i === data.length - 1;
+                  
+                  return (
+                    <div
+                      key={`label-${i}`}
+                      className="text-xs text-gray-500 whitespace-nowrap"
+                      style={{ width: barWidth, textAlign: 'center' }}
+                    >
+                      {showLabel ? point.date.split(' ')[1] : ''}
+                    </div>
+                  );
                 })}
               </div>
             )}
